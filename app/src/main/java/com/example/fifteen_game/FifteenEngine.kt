@@ -6,13 +6,13 @@ interface FifteenEngine {
     fun getInitialState(): List<Int>
     fun isStepPossible(inputList: List<Int>, numberForMove: Int): Boolean
 
-    companion object: FifteenEngine {
-        val FINAL_STATE =  List(16){ it + 1 }
+    companion object : FifteenEngine {
+        val FINAL_STATE = List(8) { it + 1 }  + 0 // [1, 2, 3, 4, 5, 6, 7, 8, 0]
 
         override fun getInitialState(): List<Int> {
             var playingChips: List<Int>
             do {
-                playingChips = List(16){ it + 1 }.toMutableList().shuffled()
+                playingChips = (List(8) { it + 1 } + 0 ).shuffled()  // Номера от 1 до 8 и 0
             } while (!isSolvable(playingChips))
             return playingChips
         }
@@ -20,15 +20,11 @@ interface FifteenEngine {
         private fun isSolvable(list: List<Int>): Boolean {
             val inversions = countInversions(list)
             val blankRow = blankRowFromBottom(list)
-            return if (list.size % 2 == 0) {
-                (inversions % 2 == 0) != (blankRow % 2 == 0)
-            } else {
-                inversions % 2 == 0
-            }
+            return inversions % 2 == 0
         }
 
         private fun blankRowFromBottom(list: List<Int>): Int {
-            val gridSize = 4
+            val gridSize = 3  // 3 для 3x3
             val blankIndex = list.indexOf(0)
             return gridSize - (blankIndex / gridSize)
         }
@@ -46,30 +42,30 @@ interface FifteenEngine {
         }
 
         override fun transitionState(oldState: List<Int>, cell: Int): List<Int> {
-            if(isStepPossible(oldState, cell)) {
+            if (isStepPossible(oldState, cell)) {
                 val indexFromMove = oldState.indexOf(cell)
-                val indexToMove = oldState.indexOf(16)
+                val indexToMove = oldState.indexOf(0)  // Пустое место обозначаем нулем
                 val newState = oldState.toMutableList()
-                newState[indexFromMove] = newState[indexToMove].also { newState[indexToMove] = newState[indexFromMove]}
+                newState[indexFromMove] = 0  // Пустое место
+                newState[indexToMove] = cell  // Перемещаем ячейку
                 return newState.toList()
             } else {
-                return oldState
+                return oldState  // Движение невозможно
             }
-
         }
 
-        override fun isWin(playingChips: List<Int> ): Boolean {
+        override fun isWin(playingChips: List<Int>): Boolean {
             return playingChips == FINAL_STATE
         }
 
         override fun isStepPossible(inputList: List<Int>, numberForMove: Int): Boolean {
             val indexToMove = inputList.indexOf(numberForMove)
-            val emptyPlaceIndex = inputList.indexOf(16)
+            val emptyPlaceIndex = inputList.indexOf(0)  // Пустое место обозначаем нулем
             val neighbors = listOf(
-                emptyPlaceIndex - 4,
-                emptyPlaceIndex + 4,
-                emptyPlaceIndex - 1,
-                emptyPlaceIndex + 1
+                emptyPlaceIndex - 3,  // Сосед сверху
+                emptyPlaceIndex + 3,  // Сосед снизу
+                emptyPlaceIndex - 1,  // Сосед слева
+                emptyPlaceIndex + 1   // Сосед справа
             ).filter { it in inputList.indices }
             return indexToMove in neighbors
         }

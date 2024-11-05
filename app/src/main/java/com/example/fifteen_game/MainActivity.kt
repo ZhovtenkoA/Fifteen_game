@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,23 +35,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 
 
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.core.animateDp
 import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 
-
-
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 
-
-
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
 
@@ -116,13 +104,13 @@ fun GreetingPreview() {
                 .fillMaxSize()
                 .padding(innerPadding),
             engine = object : FifteenEngine by FifteenEngine.Companion {
-                override fun getInitialState(): List<Int> =
-                    buildList {
-                        repeat(14) {add(it + 1)
-                        }
-                        add(16)
-                        add(15)
-                    }
+                //override fun getInitialState(): List<Int> =
+                    //buildList {
+                        //repeat(14) {add(it + 1)
+                       // }
+                       // add(16)
+                      //  add(15)
+                   // }
             }
         )
     }
@@ -160,8 +148,8 @@ fun MainActivityContent(
     val isWin by remember { derivedStateOf { engine.isWin(cells) } }
     var moveCount by remember { mutableStateOf(0) }
 
-    if (!isWin) {
-        Column(modifier = modifier) {
+    Column(modifier = modifier) {
+        if (!isWin) {
             MovesText(moveCount)
             Grid(
                 cells,
@@ -173,13 +161,32 @@ fun MainActivityContent(
                     moveCount++
                 }
             }
+        } else {
+            VictoryScreen(onPlayAgain = {
+                cells = engine.getInitialState()
+                moveCount = 0
+            })
         }
-    } else {
-        VictoryScreen(onPlayAgain = {
-            // Сбросьте состояние игры при нажатии кнопки
-            cells = engine.getInitialState()
-            moveCount = 0
-        })
+
+        // Кнопка "Рестарт"
+        Button(
+            onClick = {
+                cells = engine.getInitialState() // Сброс состояния игры
+                moveCount = 0 // Сброс счетчика ходов
+            },
+            modifier = Modifier
+                .padding(16.dp)
+                .height(56.dp)
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5)), // Цвет кнопки
+            shape = RoundedCornerShape(8.dp) // Закругление углов
+        ) {
+            Text(
+                text = "Restart",
+                color = Color.White,
+                fontSize = 20.sp
+            )
+        }
     }
 }
 
@@ -200,10 +207,9 @@ fun VictoryScreen(onPlayAgain: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // Анимация текста "VICTORY"
             AnimatedVisibility(visible) {
                 Text(
-                    text = "VICTORY",
+                    text = "You win!",
                     color = Color.White,
                     fontSize = 50.sp,
                     fontWeight = FontWeight.Bold,
@@ -243,13 +249,13 @@ fun Grid(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        repeat(4) { outerIndex ->
+        repeat(3) { outerIndex ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
-                repeat(4) { innerIndex ->
-                    val index = outerIndex * 4 + innerIndex
+                repeat(3) { innerIndex ->
+                    val index = outerIndex * 3 + innerIndex
                     Chip(cells[index], onChipClick)
                 }
             }
@@ -274,12 +280,12 @@ fun Chip(
                 Log.i("MyButtonOnClick", "Clicking on chip with number $cell")
             },
             modifier = Modifier.fillMaxSize(),
-            colors = ButtonDefaults.buttonColors(containerColor = if (cell == 16) Color.Transparent else Color(0xFFFEE1FC)),
-            border = if (cell != 16) BorderStroke(1.dp, Color.Black) else null,
+            colors = ButtonDefaults.buttonColors(containerColor = if (cell == 0) Color.Transparent else Color(0xff819fbc)),
+            border = if (cell != 0) BorderStroke(1.dp, Color.Black) else null,
             shape = RoundedCornerShape(8.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            if (cell != 16) {
+            if (cell != 0) {
                 Text(
                     text = cell.toString(),
                     fontSize = 50.sp,
